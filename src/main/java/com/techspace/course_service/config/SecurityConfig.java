@@ -2,7 +2,6 @@ package com.techspace.course_service.config;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,7 +11,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import com.techspace.course_service.security.JwtAuthenticationFilter;
 
 @Configuration
@@ -36,15 +34,13 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/",                       // Fixes the 403 on the main URL
-                    "/error",                  // Fixes the internal redirect error
-                    "/api/auth/**",            // Essential for login/signup
+                    "/",                       // Permit root for health checks
+                    "/error",                  // Permit error path
+                    "/api/auth/**",            // Permit all auth endpoints
                     "/v3/api-docs/**",
                     "/v3/api-docs",
                     "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/swagger-resources/**",
-                    "/webjars/**"
+                    "/swagger-ui.html"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
@@ -56,16 +52,12 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        
-        // Allowed Origins: Local development + your Render URL
         config.setAllowedOrigins(List.of(
-            "http://localhost:3000", 
-            "https://techspace-backend-1.onrender.com"
-            // Add your Frontend (Vercel/Netlify) URL here when deployed!
-        )); 
-        
+            "http://localhost:3000",
+            "https://techspace-backend-1.onrender.com" // Add your frontend URL here later
+        ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
