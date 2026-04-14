@@ -56,11 +56,42 @@ public class AuthController {
         return generateAuthResponse(user);
     }
 
-    @PostMapping("/google")
-    public ResponseEntity<AuthResponse> googleLogin(@RequestBody Map<String, String> request) {
-        User user = authService.processGoogleUser(request.get("email"), request.get("name"));
+   @PostMapping("/google")
+public ResponseEntity<AuthResponse> googleLogin(@RequestBody Map<String, String> request) {
+
+    String token = request.get("token");
+
+    try {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(),
+                new GsonFactory()
+        )
+        .setAudience(Collections.singletonList(
+            "1093719290286-uc5lora2h8eq3pt412m7lm5iq25gpmoo.apps.googleusercontent.com"
+        ))
+        .build();
+
+        GoogleIdToken idToken = verifier.verify(token);
+
+        if (idToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        GoogleIdToken.Payload payload = idToken.getPayload();
+
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
+
+        // Your existing logic
+        User user = authService.processGoogleUser(email, name);
+
         return generateAuthResponse(user);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
+}
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> req) {
