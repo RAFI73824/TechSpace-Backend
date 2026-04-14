@@ -7,6 +7,8 @@ COPY . .
 RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
+RUN ls -l target
+
 EXPOSE 8081
 
 CMD ["java", "-jar", "target/course-service-0.0.1-SNAPSHOT.jar"]
