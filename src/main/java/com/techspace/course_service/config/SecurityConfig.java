@@ -28,36 +28,42 @@ public class SecurityConfig {
     }
 
     @Bean
-   
-    	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    	    http
-    	        .csrf(csrf -> csrf.disable())
-    	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-    	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    	        .authenticationProvider(authenticationProvider)
-    	        .authorizeHttpRequests(auth -> auth
-    	            .requestMatchers(
-    	                "/api/auth/**",
-    	                "/v3/api-docs/**",
-    	                "/v3/api-docs",
-    	                "/swagger-ui/**",
-    	                "/swagger-ui.html",
-    	                "/swagger-resources/**",
-    	                "/webjars/**"
-    	            ).permitAll()
-    	            .anyRequest().authenticated()
-    	        )
-    	        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/",                       // Permits the root URL (Status check)
+                    "/error",                  // Permits Spring's default error path
+                    "/api/auth/**",            // Permits Login/Signup
+                    "/v3/api-docs/**",
+                    "/v3/api-docs",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/swagger-resources/**",
+                    "/webjars/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    	    return http.build();
-    	}
+        return http.build();
+    }
+
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        
+        // IMPORTANT: Add your deployed FRONTEND URL here (e.g., Netlify or Vercel link)
         config.setAllowedOrigins(List.of(
-        	    "http://localhost:3000",
-        	    "https://techspace-backend-1.onrender.com"
-        	)); // Your React URL
+            "http://localhost:3000", 
+            "https://techspace-backend-1.onrender.com",
+            "https://your-frontend-app.netlify.app" 
+        )); 
+        
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(true);
