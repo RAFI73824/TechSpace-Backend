@@ -1,26 +1,17 @@
 package com.techspace.course_service.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.techspace.course_service.dto.AuthResponse;
-import com.techspace.course_service.dto.PhoneLoginRequest;
+import org.springframework.web.bind.annotation.*;
+import com.techspace.course_service.dto.*;
 import com.techspace.course_service.entity.User;
 import com.techspace.course_service.repository.UserRepository;
 import com.techspace.course_service.security.JwtService;
-import com.techspace.course_service.service.AuthService;
-import com.techspace.course_service.service.EmailService;
-import com.techspace.course_service.service.TwilioService;
+import com.techspace.course_service.service.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,8 +26,7 @@ public class AuthController {
 
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
-        String phone = request.get("phone");
-        twilioService.sendOtp(phone);
+        twilioService.sendOtp(request.get("phone"));
         return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
     }
 
@@ -62,7 +52,6 @@ public class AuthController {
         user.setPassword(request.get("password"));
         user.setName(request.get("name"));
         user.setPhone(request.get("phone"));
-
         user = authService.registerUser(user);
         return generateAuthResponse(user);
     }
@@ -76,49 +65,48 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> req) {
         String email = req.get("email");
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Optional<User> userOpt = userRepository.findByEmail(email);
 
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "User not registered. Kindly register first."));
+        }
+
+        User user = userOpt.get();
         String token = UUID.randomUUID().toString();
         user.setResetToken(token);
         user.setResetTokenExpiry(System.currentTimeMillis() + 15 * 60 * 1000);
         userRepository.save(user);
 
-        // Update this URL once your frontend is deployed
-        String resetLink = "http://localhost:3000/reset-password?token=" + token;
+        // Update this URL to your Render Frontend URL
+        String resetLink = "https://techspace-frontend.onrender.com/reset-password?token=" + token;
         emailService.sendPasswordResetEmail(email, resetLink);
 
-        return ResponseEntity.ok("Reset link sent to your email");
+        return ResponseEntity.ok(Map.of("message", "Reset link sent to your email"));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> req) {
         User user = userRepository.findByResetToken(req.get("token"))
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
-
         user.setPassword(passwordEncoder.encode(req.get("newPassword")));
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
         userRepository.save(user);
-
-        return ResponseEntity.ok("Password updated");
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
     }
 
-    // Helper to keep code DRY (Don't Repeat Yourself)
     private ResponseEntity<AuthResponse> generateAuthResponse(User user) {
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail() != null ? user.getEmail() : user.getPhone())
-                .password(user.getPassword() != null ? user.getPassword() : "")
+                .password("")
                 .authorities("ROLE_STUDENT")
                 .build();
-
         String token = jwtService.generateToken(userDetails);
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("name", user.getName());
         userMap.put("email", user.getEmail());
         userMap.put("phone", user.getPhone());
-        userMap.put("role", user.getRole());
-
         return ResponseEntity.ok(new AuthResponse(token, userMap));
     }
 }
