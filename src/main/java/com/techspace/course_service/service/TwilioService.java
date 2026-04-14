@@ -27,10 +27,21 @@ public class TwilioService {
     // Use ConcurrentHashMap to store OTPs safely in memory
     private final Map<String, String> otpCache = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    public void initTwilio() {
+  @PostConstruct
+public void initTwilio() {
+    try {
+        if (accountSid == null || authToken == null) {
+            System.out.println("⚠️ Twilio credentials missing. Skipping initialization.");
+            return;
+        }
+
         Twilio.init(accountSid, authToken);
+        System.out.println("✅ Twilio initialized successfully");
+
+    } catch (Exception e) {
+        System.out.println("❌ Twilio initialization failed: " + e.getMessage());
     }
+}
 
     /**
      * Generates an OTP, stores it in memory, and sends it via SMS.
