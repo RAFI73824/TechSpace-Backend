@@ -36,9 +36,9 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/",                       // Permits the root URL (Status check)
-                    "/error",                  // Permits Spring's default error path
-                    "/api/auth/**",            // Permits Login/Signup
+                    "/",                       // Fixes the 403 on the main URL
+                    "/error",                  // Fixes the internal redirect error
+                    "/api/auth/**",            // Essential for login/signup
                     "/v3/api-docs/**",
                     "/v3/api-docs",
                     "/swagger-ui/**",
@@ -57,15 +57,15 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         
-        // IMPORTANT: Add your deployed FRONTEND URL here (e.g., Netlify or Vercel link)
+        // Allowed Origins: Local development + your Render URL
         config.setAllowedOrigins(List.of(
             "http://localhost:3000", 
-            "https://techspace-backend-1.onrender.com",
-            "https://your-frontend-app.netlify.app" 
+            "https://techspace-backend-1.onrender.com"
+            // Add your Frontend (Vercel/Netlify) URL here when deployed!
         )); 
         
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept"));
         config.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
