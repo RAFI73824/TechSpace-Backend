@@ -27,7 +27,7 @@ public class SecurityConfig {
         this.authenticationProvider = authenticationProvider;
     }
 
-   @Bean
+    @Bean
    
     	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     	    http
@@ -51,11 +51,13 @@ public class SecurityConfig {
 
     	    return http.build();
     	}
-
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // Your React URL
+        config.setAllowedOrigins(List.of(
+        	    "http://localhost:3000",
+        	    "https://techspace-backend-1.onrender.com"
+        	)); // Your React URL
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(true);
