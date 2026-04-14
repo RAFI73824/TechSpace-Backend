@@ -43,6 +43,10 @@ public class AuthController {
         return generateAuthResponse(user);
     }
 
+     @GetMapping("/")
+    public String home() {
+        return "Backend is running 🚀";
+    }
     @PostMapping("/email-login")
     public ResponseEntity<AuthResponse> login(@RequestBody Map<String, String> request) {
         User user = authService.authenticateUser(request.get("email"), request.get("password"));
