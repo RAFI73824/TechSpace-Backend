@@ -12,6 +12,10 @@ import com.techspace.course_service.entity.User;
 import com.techspace.course_service.repository.UserRepository;
 import com.techspace.course_service.security.JwtService;
 import com.techspace.course_service.service.*;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 @RestController
 @RequestMapping("/api/auth")
