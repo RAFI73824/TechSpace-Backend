@@ -49,7 +49,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
+
     @Bean
 public UrlBasedCorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
