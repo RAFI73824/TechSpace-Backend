@@ -52,10 +52,10 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-            "http://localhost:3000",
-            "https://techspace-backend-1.onrender.com" // Add your frontend URL here later
-        ));
+       config.setAllowedOrigins(List.of(
+    "http://localhost:3000",
+    "https://techspace-frontend.onrender.com"
+));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(true);
